@@ -16,6 +16,16 @@ export async function POST(request: Request) {
 
     const configuredEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
     const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+    console.log("Admin login diagnostics:", {
+  configuredEmail: Boolean(configuredEmail),
+  emailMatches:
+    parsed.data.email.trim().toLowerCase() === configuredEmail,
+  hashPresent: Boolean(passwordHash),
+  hashFormatValid: /^\$2[aby]\$\d{2}\$/.test(passwordHash || ""),
+  passwordMatches: passwordHash
+    ? await bcrypt.compare(parsed.data.password, passwordHash)
+    : false,
+});
     if (!configuredEmail || !passwordHash || !process.env.SESSION_SECRET) {
       return NextResponse.json({ error: "Admin sign-in is not configured on the server yet." }, { status: 503 });
     }
