@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentType {
+  ARTICLE
+  BLOG
+  STORY
+  MOCK_TEST
+}
+
+enum Subject {
+  NISM
+  NCFM
+  FINANCE
+  AI_ML
+  BLOCKCHAIN
+  DEFI
+  MATHEMATICS
+  GENERAL
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ContentItem {
+  id             String        @id @default(cuid())
+  title          String
+  slug           String        @unique
+  type           ContentType
+  subject        Subject       @default(GENERAL)
+  excerpt        String        @db.VarChar(500)
+  body           String        @db.Text
+  coverImageUrl  String?
+  tags           String[]      @default([])
+  questions      Json          @default("[]")
+  durationMinutes Int?
+  status         ContentStatus @default(DRAFT)
+  featured       Boolean       @default(false)
+  readingMinutes Int?
+  publishedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([type, subject, status])
+  @@index([featured, publishedAt])
+}
