@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       data: {
         title: data.title, slug, type: data.type, subject: data.subject,
         excerpt: data.excerpt, body: data.body, coverImageUrl: data.coverImageUrl || null,
+        youtubeUrl: data.youtubeUrl || null,
         tags: data.tags, questions: data.questions, status: data.status,
         featured: data.featured, readingMinutes: data.readingMinutes ?? null,
         durationMinutes: data.durationMinutes ?? null,
