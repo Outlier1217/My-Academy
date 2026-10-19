@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContentCard from "@/components/ContentCard";
 import { getPublishedContent } from "@/lib/content";
+import { db } from "@/lib/prisma";
 
 const LEARNING_PATHS = [
   { n: "01", title: "Finance & certifications", copy: "Prepare for NISM and NCFM, then deepen your understanding of markets and risk.", href: "/mock-tests", label: "Explore finance", icon: "↗" },
@@ -12,7 +13,14 @@ const LEARNING_PATHS = [
 ];
 
 export default async function HomePage() {
-  const recent = await getPublishedContent({ take: 3 });
+  const [recent, testimonials] = await Promise.all([
+    getPublishedContent({ take: 3 }),
+    db.candidateTestimonial.findMany({
+      where: { isPublished: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 12,
+    }),
+  ]);
   return <><Navbar />
     <main>
       <section className="hero-section">
@@ -43,6 +51,53 @@ export default async function HomePage() {
       <section className="section-shell latest-section"><div className="section-heading reveal" data-reveal><div><p className="eyebrow">FRESH FROM THE STUDIO</p><h2>Ideas in motion.</h2></div><Link href="/articles" className="text-link">Explore the library ↗</Link></div>
         {recent.length ? <div className="content-grid">{recent.map((item) => <ContentCard key={item.id} item={item} />)}</div> : <div className="publish-preview reveal" data-reveal><div className="publish-preview-mark">✳</div><div><p className="eyebrow">YOUR IDEAS, YOUR PLATFORM</p><h3>The first article is yours to publish.</h3><p>Use the content studio to add your articles, blogs, stories and subject-wise mock tests. Published work appears here automatically.</p><Link href="/admin/login" className="text-link">Open content studio ↗</Link></div><div className="publish-code">CONTENT<br /><span>→</span> POSTGRESQL<br /><span>→</span> KNOWLEDGE</div></div>}
       </section>
+
+      
+{testimonials.length > 0 && (
+  <section className="section-shell py-16 md:py-24">
+    <div className="section-heading reveal" data-reveal>
+      <div>
+        <p className="eyebrow">OUTLIER COMMUNITY</p>
+        <h2>
+          Our learners.<br />
+          <em>Their stories.</em>
+        </h2>
+      </div>
+      <p>
+        Experiences and reflections shared by learners in the Outlier Academy community.
+      </p>
+    </div>
+
+    <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      {testimonials.map((candidate) => (
+        <article
+          key={candidate.id}
+          className="flex flex-col rounded-2xl border border-current/10 p-5 md:p-6"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={candidate.imageUrl}
+            alt={candidate.name}
+            loading="lazy"
+            className="mb-5 h-20 w-20 rounded-full border border-current/10 object-cover"
+          />
+
+          <p className="text-base leading-7">
+            “{candidate.message}”
+          </p>
+
+          <div className="mt-auto pt-6">
+            <h3 className="font-semibold">{candidate.name}</h3>
+            <p className="mt-1 text-sm leading-6 opacity-70">
+              {candidate.about}
+            </p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
 
       <section className="profile-section"><div className="profile-copy reveal" data-reveal><p className="eyebrow">BUILT IN THE OPEN</p><h2>Curiosity is better<br />when it is <em>shared.</em></h2><p>I'm Mustak — a mathematics graduate, educator and builder exploring the meeting point of finance, software and emerging technology.</p><Link href="https://github.com/Outlier1217" target="_blank" rel="noreferrer noopener" className="button button-secondary">Follow the work on GitHub ↗</Link></div><div className="profile-links reveal" data-reveal><a href="https://github.com/Outlier1217" target="_blank" rel="noreferrer noopener"><span>01</span><strong>GitHub</strong><small>Code & experiments</small><b>↗</b></a><a href="https://www.linkedin.com/in/mustak1217" target="_blank" rel="noreferrer noopener"><span>02</span><strong>LinkedIn</strong><small>Professional journey</small><b>↗</b></a><a href="https://quilvion.xyz/" target="_blank" rel="noreferrer noopener"><span>03</span><strong>Projects</strong><small>Quilvion & more</small><b>↗</b></a><a href="https://x.com/Mustak1217" target="_blank" rel="noreferrer noopener"><span>04</span><strong>X / Twitter</strong><small>Ideas in public</small><b>↗</b></a><a href="https://www.instagram.com/mustak_1217" target="_blank" rel="noreferrer noopener"><span>05</span><strong>Instagram</strong><small>Behind the scenes</small><b>↗</b></a><a href="https://t.me/Outlier_Lab/1" target="_blank" rel="noreferrer noopener"><span>06</span><strong>Telegram</strong><small>Outlier Lab community</small><b>↗</b></a></div></section>
     </main><Footer /></>;

@@ -5,10 +5,20 @@ import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } fr
 import MockTestStudio from "@/components/MockTestStudio";
 import CoursesStudio from "@/components/CoursesStudio";
 import UserManagementPanel from "@/components/UserManagementPanel";
+import ContactMessagesPanel from "@/components/ContactMessagesPanel";
+import CourseReviewsAdminPanel from "@/components/CourseReviewsAdminPanel";
+import TestimonialsStudio from "@/components/TestimonialsStudio";
 
 type ContentType = "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
 type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-type Section = "content" | "tests" | "courses" | "users";
+type Section =
+  | "content"
+  | "tests"
+  | "courses"
+  | "users"
+  | "messages"
+  | "reviews"
+  | "testimonials";
 
 type Item = {
   id: string;
@@ -356,6 +366,40 @@ export default function AdminDashboard() {
 >
   Users
 </button>
+<button
+  type="button"
+  className={
+    activeSection === "messages"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("messages")}
+>
+  Contact Messages
+</button>
+<button
+  type="button"
+  className={
+    activeSection === "reviews"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("reviews")}
+>
+  Course Reviews
+</button>
+
+<button
+  type="button"
+  className={
+    activeSection === "testimonials"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("testimonials")}
+>
+  Success Stories
+</button>
         </nav>
 
         <div className="admin-stats">
@@ -536,8 +580,14 @@ export default function AdminDashboard() {
             <MockTestStudio />
           ) : activeSection === "courses" ? (
             <CoursesStudio />
-          ) : (
+          ) : activeSection === "users" ? (
             <UserManagementPanel />
+          ) : activeSection === "messages" ? (
+            <ContactMessagesPanel />
+          ) : activeSection === "reviews" ? (
+            <CourseReviewsAdminPanel />
+          ) : (
+            <TestimonialsStudio />
           )}
 
         <p className="admin-footnote">

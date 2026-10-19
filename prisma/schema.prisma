@@ -54,6 +54,7 @@ model ContentItem {
   bookmarks       Bookmark[]
   favourites      Favourite[]
   attempts        MockTestAttempt[]
+  reviews         CourseReview[]
 
   @@index([status, publishedAt])
   @@index([type, subject, status])
@@ -71,6 +72,8 @@ model User {
   bookmarks       Bookmark[]
   favourites      Favourite[]
   attempts        MockTestAttempt[]
+  contactMessages ContactMessage[]
+  courseReviews   CourseReview[]
 
   @@index([createdAt])
 }
@@ -125,4 +128,51 @@ model MockTestAttempt {
 
   @@index([userId, createdAt])
   @@index([contentId, createdAt])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  email     String   @db.VarChar(254)
+  message   String   @db.VarChar(5000)
+  isRead    Boolean  @default(false)
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([isRead, createdAt])
+  @@index([userId, createdAt])
+}
+
+model CourseReview {
+  id        String   @id @default(cuid())
+  contentId String
+  userId    String?
+  name      String   @db.VarChar(100)
+  email     String   @db.VarChar(254)
+  rating    Int
+  feedback  String   @db.VarChar(3000)
+  createdAt DateTime @default(now())
+
+  content ContentItem @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user    User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([contentId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model CandidateTestimonial {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  imageUrl    String   @db.VarChar(2048)
+  about       String   @db.VarChar(1000)
+  message     String   @db.VarChar(3000)
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+  @@index([createdAt])
 }
