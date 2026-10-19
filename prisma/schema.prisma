@@ -161,3 +161,18 @@ model CourseReview {
   @@index([contentId, createdAt])
   @@index([userId, createdAt])
 }
+
+model CandidateTestimonial {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  imageUrl    String   @db.VarChar(2048)
+  about       String   @db.VarChar(1000)
+  message     String   @db.VarChar(3000)
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+  @@index([createdAt])
+}
