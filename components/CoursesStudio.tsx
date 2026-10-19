@@ -295,39 +295,39 @@ export default function CoursesStudio() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber">
             Outlier Academy
           </p>
           <h2 className="mt-1 text-2xl font-bold">Courses Studio</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted">
             Manage course details, cover images and YouTube lessons.
           </p>
         </div>
         <button
           type="button"
           onClick={startNewCourse}
-          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="rounded-xl bg-amber text-ink px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
         >
           + New course
         </button>
       </div>
 
       {error && (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div role="alert" className="rounded-xl border border-error bg-surface2 p-3 text-sm text-error">
           {error}
         </div>
       )}
       {notice && (
-        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+        <div role="status" className="rounded-xl border border-teal bg-emerald-50 p-3 text-sm text-teal">
           {notice}
         </div>
       )}
 
-      <form onSubmit={saveCourse} className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-7">
+      <form onSubmit={saveCourse} className="space-y-5 rounded-2xl border border-border bg-surface p-5 shadow-sm md:p-7">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-lg font-bold">{editingId ? "Edit course" : "Create a course"}</h3>
           {editingId && (
-            <button type="button" onClick={startNewCourse} className="text-sm font-medium text-gray-600 underline">
+            <button type="button" onClick={startNewCourse} className="text-sm font-medium text-muted underline">
               Cancel editing
             </button>
           )}
@@ -349,7 +349,7 @@ export default function CoursesStudio() {
                   slug: editingId ? current.slug : makeSlug(title),
                 }));
               }}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+              className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
               placeholder="Complete Python Course"
             />
           </label>
@@ -359,7 +359,7 @@ export default function CoursesStudio() {
             <input
               value={form.slug}
               onChange={(e) => updateField("slug", makeSlug(e.target.value))}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+              className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
               placeholder="complete-python-course"
             />
           </label>
@@ -369,7 +369,7 @@ export default function CoursesStudio() {
             <select
               value={form.subject}
               onChange={(e) => updateField("subject", e.target.value)}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+              className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
             >
               {SUBJECTS.map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
@@ -382,7 +382,7 @@ export default function CoursesStudio() {
             <select
               value={form.status}
               onChange={(e) => updateField("status", e.target.value as CourseStatus)}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+              className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
             >
               <option value="DRAFT">Draft</option>
               <option value="PUBLISHED">Published</option>
@@ -400,7 +400,7 @@ export default function CoursesStudio() {
             rows={3}
             value={form.excerpt}
             onChange={(e) => updateField("excerpt", e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+            className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
             placeholder="What will students learn in this course?"
           />
         </label>
@@ -411,7 +411,7 @@ export default function CoursesStudio() {
             rows={6}
             value={form.body}
             onChange={(e) => updateField("body", e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+            className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
             placeholder="Course overview, syllabus, prerequisites and learning outcomes..."
           />
         </label>
@@ -423,10 +423,10 @@ export default function CoursesStudio() {
             required
             value={form.youtubeUrl}
             onChange={(e) => updateField("youtubeUrl", e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2.5"
+            className="mt-1 w-full rounded-xl border border-border px-3 py-2.5"
             placeholder="https://www.youtube.com/watch?v=..."
           />
-          <span className="mt-1 block text-xs font-normal text-gray-500">
+          <span className="mt-1 block text-xs font-normal text-muted">
             Paste a public or unlisted YouTube video/playlist link. Embedding must be enabled for that video.
           </span>
         </label>
@@ -445,9 +445,9 @@ export default function CoursesStudio() {
               className="mt-2 block w-full text-sm"
             />
           </label>
-          <p className="mt-1 text-xs text-gray-500">JPG, PNG, WEBP or GIF; maximum 5 MB.</p>
+          <p className="mt-1 text-xs text-muted">JPG, PNG, WEBP or GIF; maximum 5 MB.</p>
 
-          {uploading && <p className="mt-2 text-sm text-indigo-600">Uploading image…</p>}
+          {uploading && <p className="mt-2 text-sm text-amber">Uploading image…</p>}
 
           {form.coverImageUrl && (
             <div className="mt-3 max-w-sm">
@@ -455,12 +455,12 @@ export default function CoursesStudio() {
               <img
                 src={form.coverImageUrl}
                 alt="Course cover preview"
-                className="aspect-video w-full rounded-xl border border-gray-200 object-cover"
+                className="aspect-video w-full rounded-xl border border-border object-cover"
               />
               <button
                 type="button"
                 onClick={() => updateField("coverImageUrl", "")}
-                className="mt-2 text-sm text-red-600 underline"
+                className="mt-2 text-sm text-error underline"
               >
                 Remove cover image
               </button>
@@ -472,11 +472,11 @@ export default function CoursesStudio() {
           <button
             type="submit"
             disabled={saving || uploading}
-            className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-amber text-ink px-5 py-2.5 font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? "Saving…" : editingId ? "Update course" : "Save course"}
           </button>
-          <a href="/courses" target="_blank" rel="noreferrer" className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold">
+          <a href="/courses" target="_blank" rel="noreferrer" className="rounded-xl border border-border px-5 py-2.5 font-semibold">
             Preview courses page
           </a>
         </div>
@@ -485,54 +485,54 @@ export default function CoursesStudio() {
       <section className="space-y-4">
         <div>
           <h3 className="text-xl font-bold">Your courses</h3>
-          <p className="text-sm text-gray-500">Edit a course or change its publication status.</p>
+          <p className="text-sm text-muted">Edit a course or change its publication status.</p>
         </div>
 
         {loading ? (
-          <p className="text-sm text-gray-500">Loading courses…</p>
+          <p className="text-sm text-muted">Loading courses…</p>
         ) : courses.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted">
             No courses yet. Create your first course above.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {courses.map((course) => (
-              <article key={course.id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+              <article key={course.id} className="overflow-hidden rounded-2xl border border-border bg-surface">
                 {course.coverImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={course.coverImageUrl} alt="" className="aspect-video w-full object-cover" />
                 ) : (
-                  <div className="flex aspect-video items-center justify-center bg-gray-100 text-sm text-gray-400">
+                  <div className="flex aspect-video items-center justify-center bg-surface2 text-sm text-muted">
                     No cover image
                   </div>
                 )}
                 <div className="space-y-3 p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold">{course.status}</span>
-                    <span className="text-xs text-gray-500">{course.subject.replaceAll("_", " ")}</span>
+                    <span className="rounded-full bg-surface2 px-2.5 py-1 text-xs font-semibold">{course.status}</span>
+                    <span className="text-xs text-muted">{course.subject.replaceAll("_", " ")}</span>
                   </div>
                   <h4 className="font-bold">{course.title}</h4>
-                  <p className="line-clamp-3 text-sm text-gray-600">{course.excerpt}</p>
+                  <p className="line-clamp-3 text-sm text-muted">{course.excerpt}</p>
                   <div className="flex flex-wrap gap-3 pt-1">
-                    <button type="button" onClick={() => editCourse(course)} className="text-sm font-semibold text-indigo-600">
+                    <button type="button" onClick={() => editCourse(course)} className="text-sm font-semibold text-amber">
                       Edit
                     </button>
                     {course.status !== "PUBLISHED" ? (
-                      <button type="button" onClick={() => void changeStatus(course, "PUBLISHED")} className="text-sm font-semibold text-emerald-700">
+                      <button type="button" onClick={() => void changeStatus(course, "PUBLISHED")} className="text-sm font-semibold text-teal">
                         Publish
                       </button>
                     ) : (
-                      <button type="button" onClick={() => void changeStatus(course, "DRAFT")} className="text-sm font-semibold text-amber-700">
+                      <button type="button" onClick={() => void changeStatus(course, "DRAFT")} className="text-sm font-semibold text-amber">
                         Unpublish
                       </button>
                     )}
                     {course.status !== "ARCHIVED" && (
-                      <button type="button" onClick={() => void changeStatus(course, "ARCHIVED")} className="text-sm font-semibold text-gray-500">
+                      <button type="button" onClick={() => void changeStatus(course, "ARCHIVED")} className="text-sm font-semibold text-muted">
                         Archive
                       </button>
                     )}
                     {course.status === "PUBLISHED" && (
-                      <a href={`/courses/${course.slug}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-indigo-600">
+                      <a href={`/courses/${course.slug}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-amber">
                         View course ↗
                       </a>
                     )}
