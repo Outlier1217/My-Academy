@@ -3,10 +3,11 @@
 
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import MockTestStudio from "@/components/MockTestStudio";
+import CoursesStudio from "@/components/CoursesStudio";
 
 type ContentType = "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
 type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-type Section = "content" | "tests";
+type Section = "content" | "tests" | "courses";
 
 type Item = {
   id: string;
@@ -333,6 +334,16 @@ export default function AdminDashboard() {
           >
             Mock Test Studio
           </button>
+
+          <button
+  type="button"
+  onClick={() => setActiveSection("courses")}
+  className={activeSection === "courses"
+    ? "rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white"
+    : "rounded-xl border border-gray-300 px-4 py-2 font-semibold text-gray-700"}
+>
+  Courses Studio
+</button>
         </nav>
 
         <div className="admin-stats">
@@ -509,9 +520,11 @@ export default function AdminDashboard() {
               </section>
             </div>
           </>
-        ) : (
-          <MockTestStudio />
-        )}
+          ) : activeSection === "tests" ? (
+            <MockTestStudio />
+          ) : (
+            <CoursesStudio />
+          )}
 
         <p className="admin-footnote">
           Publishing makes an item visible publicly. Drafts remain private.

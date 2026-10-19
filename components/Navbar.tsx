@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: "Stories", href: "/stories" },
   { label: "Mock Tests", href: "/mock-tests" },
   { label: "Mathematics", href: "/math" },
+  { label: "Courses", href: "/courses" },
 ];
 
 export default function Navbar() {

@@ -12,6 +12,7 @@ enum ContentType {
   BLOG
   STORY
   MOCK_TEST
+  COURSE
 }
 
 enum Subject {
@@ -40,6 +41,7 @@ model ContentItem {
   excerpt        String        @db.VarChar(500)
   body           String        @db.Text
   coverImageUrl  String?
+  youtubeUrl     String?       @db.VarChar(2048)
   tags           String[]      @default([])
   questions      Json          @default("[]")
   durationMinutes Int?

@@ -53,7 +53,7 @@ const questionsSchema = z.union([
 export const contentSchema = z.object({
   title: z.string().trim().min(3).max(180),
   slug: z.string().trim().max(120).optional().default(""),
-  type: z.enum(["ARTICLE", "BLOG", "STORY", "MOCK_TEST"]),
+  type: z.enum(["ARTICLE", "BLOG", "STORY", "MOCK_TEST", "COURSE"]),
   subject: z.enum([
     "NISM",
     "NCFM",
@@ -74,6 +74,10 @@ export const contentSchema = z.object({
     ),
     z.literal(""),
   ]).optional().default(""),
+  youtubeUrl: z.union([
+  z.string().url().max(2048),
+  z.literal(""),
+]).optional().default(""),
   tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).default("DRAFT"),
   featured: z.boolean().default(false),
