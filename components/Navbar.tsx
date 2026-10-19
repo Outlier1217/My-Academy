@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeProvider";
+import Image from "next/image";
 
 const NAV_ITEMS = [
   { label: "Articles", href: "/articles" },
@@ -15,7 +16,16 @@ export default function Navbar() {
     <header className="site-header">
       <nav className="site-nav" aria-label="Main navigation">
         <Link href="/" className="brand" aria-label="Outlier Academy home">
-          <span className="brand-mark">O<span>.</span></span>
+          <span className="brand-mark">
+  <Image
+    src="/outlier_logo.png"
+    alt="Outlier Academy"
+    width={40}
+    height={40}
+    priority
+    className="h-10 w-10 object-contain"
+  />
+</span>
           <span className="brand-name">Outlier <b>Academy</b></span>
         </Link>
         <div className="nav-links">

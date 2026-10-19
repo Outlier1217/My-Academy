@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/prisma";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 
@@ -14,27 +16,40 @@ function getYouTubeEmbedUrl(value: string | null) {
 
     if (host === "youtu.be") {
       const id = url.pathname.split("/").filter(Boolean)[0];
+
       if (id && /^[A-Za-z0-9_-]{11}$/.test(id)) {
         return `https://www.youtube-nocookie.com/embed/${id}`;
       }
+
       return null;
     }
 
-    if (!["youtube.com", "m.youtube.com", "youtube-nocookie.com"].includes(host)) {
+    if (
+      ![
+        "youtube.com",
+        "m.youtube.com",
+        "youtube-nocookie.com",
+      ].includes(host)
+    ) {
       return null;
     }
 
     const videoId =
       url.searchParams.get("v") ||
-      url.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/)?.[1];
+      url.pathname.match(
+        /^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/
+      )?.[1];
 
     if (videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId)) {
       return `https://www.youtube-nocookie.com/embed/${videoId}`;
     }
 
     const playlistId = url.searchParams.get("list");
+
     if (playlistId && /^[A-Za-z0-9_-]+$/.test(playlistId)) {
-      return `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(playlistId)}`;
+      return `https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(
+        playlistId
+      )}`;
     }
 
     return null;
@@ -56,75 +71,92 @@ export default async function CourseDetailPage({
     },
   });
 
-  if (!course) notFound();
+  if (!course) {
+    notFound();
+  }
 
   const embedUrl = getYouTubeEmbedUrl(course.youtubeUrl);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10 text-gray-900 sm:px-6">
-      <article className="mx-auto max-w-5xl">
-        <Link
-          href="/courses"
-          className="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-        >
-          ← All courses
-        </Link>
+    <>
+      <Navbar />
 
-        {course.coverImageUrl && (
-          <div className="mt-6 overflow-hidden rounded-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+      <main className="detail-shell">
+        <article className="detail-article">
+          <Link href="/courses" className="back-link">
+            ← All courses
+          </Link>
+
+          <div className="detail-meta">
+            <span className="eyebrow-pill">
+              {course.subject.replaceAll("_", " ")}
+            </span>
+
+            <span>OUTLIER ACADEMY</span>
+          </div>
+
+          <h1>{course.title}</h1>
+
+          <p className="detail-excerpt">{course.excerpt}</p>
+
+          {course.coverImageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={course.coverImageUrl}
               alt={course.title}
-              className="max-h-[440px] w-full object-cover"
+              className="detail-cover"
             />
-          </div>
-        )}
-
-        <div className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-indigo-600">
-            {course.subject.replaceAll("_", " ")}
-          </p>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
-            {course.title}
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-gray-600">
-            {course.excerpt}
-          </p>
-        </div>
-
-        <section className="mt-8 overflow-hidden rounded-2xl border border-gray-200 bg-black shadow-sm">
-          {embedUrl ? (
-            <div className="aspect-video">
-              <iframe
-                src={embedUrl}
-                title={`${course.title} — course video`}
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
-            </div>
-          ) : (
-            <div className="bg-white p-6 text-gray-700">
-              <p className="font-semibold">Video could not be embedded.</p>
-              <p className="mt-2 text-sm">
-                Please check the YouTube URL in Courses Studio and confirm
-                that embedding is enabled for this video.
-              </p>
-            </div>
           )}
-        </section>
 
-        {course.body && (
-          <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
-            <h2 className="text-2xl font-bold">About this course</h2>
-            <div className="mt-4 whitespace-pre-wrap leading-8 text-gray-700">
-              {course.body}
+          <section className="course-player">
+            <div className="course-player-heading">
+              <p className="eyebrow">WATCH & LEARN</p>
+              <h2>Course video</h2>
             </div>
+
+            {embedUrl ? (
+              <div className="course-video-frame">
+                <iframe
+                  src={embedUrl}
+                  title={`${course.title} — course video`}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="notice">
+                <p>
+                  The video could not be embedded. Please check the
+                  YouTube URL in Courses Studio and ensure embedding
+                  is enabled for this video.
+                </p>
+              </div>
+            )}
           </section>
-        )}
-      </article>
-    </main>
+
+          {course.body && (
+            <section className="course-about">
+              <p className="eyebrow">COURSE OVERVIEW</p>
+
+              <h2>About this course</h2>
+
+              <div className="markdown-body whitespace-pre-wrap">
+                {course.body}
+              </div>
+            </section>
+          )}
+
+          <div className="course-back-action">
+            <Link href="/courses" className="button button-ghost">
+              ← Explore more courses
+            </Link>
+          </div>
+        </article>
+      </main>
+
+      <Footer />
+    </>
   );
 }
