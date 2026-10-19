@@ -50,3 +50,52 @@ export async function isAdminAuthenticated(): Promise<boolean> {
     return false;
   }
 }
+
+export const USER_COOKIE = "outlier_user_session";
+const USER_SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+
+export async function createUserSession(userId: string) {
+  const token = await new SignJWT({ role: "user" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(userId)
+    .setIssuedAt()
+    .setExpirationTime(`${USER_SESSION_TTL_SECONDS}s`)
+    .sign(sessionKey());
+
+  cookies().set(USER_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: USER_SESSION_TTL_SECONDS,
+  });
+}
+
+export async function clearUserSession() {
+  cookies().set(USER_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
+export async function getAuthenticatedUserId(): Promise<string | null> {
+  try {
+    const token = cookies().get(USER_COOKIE)?.value;
+    if (!token) return null;
+
+    const { payload } = await jwtVerify(token, sessionKey(), {
+      algorithms: ["HS256"],
+    });
+
+    if (payload.role !== "user" || typeof payload.sub !== "string") {
+      return null;
+    }
+
+    return payload.sub;
+  } catch {
+    return null;
+  }
+}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ContentActions from "@/components/ContentActions";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,12 @@ export default async function CoursesPage() {
                   <p>{course.excerpt}</p>
 
                   <div className="content-card-meta">
+                    <ContentActions
+  contentId={course.id}
+  title={course.title}
+  slug={course.slug}
+  href={`/courses/${course.slug}`}
+/>
                     <span>OUTLIER ACADEMY</span>
 
                     <Link href={`/courses/${course.slug}`}>

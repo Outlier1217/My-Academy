@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ContentActions from "@/components/ContentActions";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +99,12 @@ export default async function CourseDetailPage({
           <h1>{course.title}</h1>
 
           <p className="detail-excerpt">{course.excerpt}</p>
+          <ContentActions
+  contentId={course.id}
+  title={course.title}
+  slug={course.slug}
+  href={`/courses/${course.slug}`}
+/>
 
           {course.coverImageUrl && (
             // eslint-disable-next-line @next/next/no-img-element

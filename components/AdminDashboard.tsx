@@ -4,10 +4,11 @@
 import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import MockTestStudio from "@/components/MockTestStudio";
 import CoursesStudio from "@/components/CoursesStudio";
+import UserManagementPanel from "@/components/UserManagementPanel";
 
 type ContentType = "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
 type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-type Section = "content" | "tests" | "courses";
+type Section = "content" | "tests" | "courses" | "users";
 
 type Item = {
   id: string;
@@ -344,6 +345,17 @@ export default function AdminDashboard() {
 >
   Courses Studio
 </button>
+<button
+  type="button"
+  className={
+    activeSection === "users"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("users")}
+>
+  Users
+</button>
         </nav>
 
         <div className="admin-stats">
@@ -522,8 +534,10 @@ export default function AdminDashboard() {
           </>
           ) : activeSection === "tests" ? (
             <MockTestStudio />
-          ) : (
+          ) : activeSection === "courses" ? (
             <CoursesStudio />
+          ) : (
+            <UserManagementPanel />
           )}
 
         <p className="admin-footnote">

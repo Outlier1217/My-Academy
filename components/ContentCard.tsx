@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ContentCardItem } from "@/lib/content";
+import ContentActions from "@/components/ContentActions";
 
 const SUBJECT_LABELS: Record<string, string> = {
   NISM: "NISM", NCFM: "NCFM", FINANCE: "Finance", AI_ML: "AI / Machine Learning",
@@ -19,6 +20,11 @@ export default function ContentCard({ item }: { item: ContentCardItem }) {
         <h3><Link href={`/content/${item.slug}`}>{item.title}</Link></h3>
         <p>{item.excerpt}</p>
         <div className="content-card-meta">
+          <ContentActions
+  contentId={item.id}
+  title={item.title}
+  slug={item.slug}
+/>
           <span>{isTest ? `${item.durationMinutes ?? "—"} min` : `${item.readingMinutes ?? "—"} min read`}</span>
           <Link href={`/content/${item.slug}`} aria-label={`Open ${item.title}`}>Explore <span aria-hidden="true">↗</span></Link>
         </div>

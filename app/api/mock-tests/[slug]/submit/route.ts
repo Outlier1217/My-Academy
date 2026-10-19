@@ -1,6 +1,8 @@
+
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/prisma";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import { readMockTest } from "@/lib/questions";
 
 const submissionSchema = z.object({
@@ -31,7 +33,12 @@ export async function POST(
         type: "MOCK_TEST",
         status: "PUBLISHED",
       },
-      select: { questions: true, durationMinutes: true },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        questions: true,
+      },
     });
 
     if (!test) {
@@ -51,14 +58,16 @@ export async function POST(
       );
     }
 
-    // Reject answer indexes that do not exist in this test.
     for (const [key, selected] of Object.entries(parsed.data.answers)) {
       const index = Number(key);
+
       if (
         !Number.isInteger(index) ||
         index < 0 ||
         index >= questions.length ||
-        selected.some((option) => option >= questions[index].options.length) ||
+        selected.some(
+          (option) => option >= questions[index].options.length
+        ) ||
         new Set(selected).size !== selected.length
       ) {
         return NextResponse.json(
@@ -110,23 +119,52 @@ export async function POST(
       };
     });
 
+    score = Math.round(score * 100) / 100;
+
     const percentage =
       maximumScore > 0
         ? Math.round((score / maximumScore) * 10000) / 100
         : 0;
 
-    return NextResponse.json({
-      score: Math.round(score * 100) / 100,
+    const passed = percentage >= mockTest.settings.passingPercentage;
+
+    const result = {
+      score,
       maximumScore,
       total: questions.length,
       percentage,
       correctCount,
       wrongCount,
       unansweredCount,
-      passed: percentage >= mockTest.settings.passingPercentage,
+      passed,
       passingPercentage: mockTest.settings.passingPercentage,
       details,
-    });
+    };
+
+    // Guests can still take tests and receive results, but their
+    // attempts are not stored in the database.
+    const userId = await getAuthenticatedUserId();
+
+    if (userId) {
+      await db.mockTestAttempt.create({
+        data: {
+          userId,
+          contentId: test.id,
+          testTitle: test.title,
+          testSlug: test.slug,
+          score,
+          maximumScore,
+          percentage,
+          passed,
+          correctCount,
+          wrongCount,
+          unansweredCount,
+          result,
+        },
+      });
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error(
       "Mock test submission failed:",
