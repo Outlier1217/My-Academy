@@ -5,6 +5,7 @@ import { db } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContentActions from "@/components/ContentActions";
+import CourseReviews from "@/components/CourseReviews";
 
 export const dynamic = "force-dynamic";
 
@@ -154,6 +155,8 @@ export default async function CourseDetailPage({
               </div>
             </section>
           )}
+
+          <CourseReviews slug={course.slug} />
 
           <div className="course-back-action">
             <Link href="/courses" className="button button-ghost">

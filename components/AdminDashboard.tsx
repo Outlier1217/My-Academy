@@ -5,10 +5,11 @@ import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } fr
 import MockTestStudio from "@/components/MockTestStudio";
 import CoursesStudio from "@/components/CoursesStudio";
 import UserManagementPanel from "@/components/UserManagementPanel";
+import ContactMessagesPanel from "@/components/ContactMessagesPanel";
 
 type ContentType = "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
 type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-type Section = "content" | "tests" | "courses" | "users";
+type Section = "content" | "tests" | "courses" | "users" | "messages";
 
 type Item = {
   id: string;
@@ -356,6 +357,17 @@ export default function AdminDashboard() {
 >
   Users
 </button>
+<button
+  type="button"
+  className={
+    activeSection === "messages"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("messages")}
+>
+  Contact Messages
+</button>
         </nav>
 
         <div className="admin-stats">
@@ -536,8 +548,10 @@ export default function AdminDashboard() {
             <MockTestStudio />
           ) : activeSection === "courses" ? (
             <CoursesStudio />
-          ) : (
+          ) : activeSection === "users" ? (
             <UserManagementPanel />
+          ) : (
+            <ContactMessagesPanel />
           )}
 
         <p className="admin-footnote">

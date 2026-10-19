@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ContactUsForm from "@/components/ContactUsForm";
 
 export default function Footer() {
   return (
@@ -24,6 +25,9 @@ export default function Footer() {
           </a>
         </div>
       </div>
+      <div className="mx-auto mt-10 max-w-7xl border-t border-current/10 pt-8">
+  <ContactUsForm />
+</div>
 
       <div className="mx-auto mt-10 max-w-7xl border-t border-current/10 pt-5 text-xs opacity-55">
         © {new Date().getFullYear()} Outlier Academy. All rights reserved.
