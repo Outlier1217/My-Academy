@@ -30,6 +30,7 @@ type TestItem = {
   title: string;
   slug: string;
   type: "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
+  coverImageUrl: string | null;
   subject: string;
   excerpt: string;
   body: string;
@@ -61,6 +62,40 @@ function createQuestion(): Question {
     marks: 1,
     negativeMarks: 0,
   };
+}
+
+// CSV parser supports quoted cells, commas, escaped quotes and line breaks inside quoted cells.
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '"') {
+      if (quoted && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === "," && !quoted) {
+      row.push(cell.trim());
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell.trim());
+      if (row.some((value) => value.length > 0)) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  row.push(cell.trim());
+  if (row.some((value) => value.length > 0)) rows.push(row);
+  return rows;
 }
 
 function decodeTest(value: unknown) {
@@ -153,6 +188,8 @@ export default function MockTestStudio() {
   const [subject, setSubject] = useState("NISM");
   const [excerpt, setExcerpt] = useState("");
   const [body, setBody] = useState("Complete the mock test and review your results.");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [status, setStatus] = useState<Status>("DRAFT");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -193,6 +230,8 @@ export default function MockTestStudio() {
     setSubject("NISM");
     setExcerpt("");
     setBody("Complete the mock test and review your results.");
+    setCoverImageUrl("");
+    setUploadingImage(false);
     setStatus("DRAFT");
     setSettings(DEFAULT_SETTINGS);
     setQuestions([]);
@@ -209,6 +248,7 @@ export default function MockTestStudio() {
     setSubject(test.subject);
     setExcerpt(test.excerpt);
     setBody(test.body);
+    setCoverImageUrl(test.coverImageUrl ?? "");
     setStatus(test.status);
     setSettings({
       ...decoded.settings,
@@ -220,6 +260,115 @@ export default function MockTestStudio() {
     setError("");
     setMessage("");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function uploadCoverImage(file: File) {
+    setError("");
+    setMessage("");
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Could not upload cover image.");
+      if (typeof data.url !== "string") throw new Error("Upload response did not include an image URL.");
+      setCoverImageUrl(data.url);
+      setMessage("Cover image uploaded. Save the mock test to keep this image.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not upload cover image.");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function importCsv(file: File) {
+    setError("");
+    setMessage("");
+    try {
+      const rows = parseCsv(await file.text());
+      if (rows.length < 2) throw new Error("CSV must contain a header and at least one question.");
+      const headers = rows[0].map((value) => value.trim().toLowerCase().replace(/\s+/g, ""));
+      const column = (...names: string[]) => headers.findIndex((value) => names.includes(value));
+      const qCol = column("question", "questiontext", "q");
+      const answerCol = column("answer", "answers", "correctanswer", "correctanswers");
+      if (qCol < 0) throw new Error('CSV needs a "question" column.');
+      if (answerCol < 0) throw new Error('CSV needs an "answer" column (for example A or A|C).');
+      const optionCols = [
+        column("optiona", "option1", "a"),
+        column("optionb", "option2", "b"),
+        column("optionc", "option3", "c"),
+        column("optiond", "option4", "d"),
+        column("optione", "option5", "e"),
+        column("optionf", "option6", "f"),
+        column("optiong", "option7", "g"),
+        column("optionh", "option8", "h"),
+      ];
+      const multipleCol = column("multipleanswers", "multiple", "ismultiple");
+      const explanationCol = column("explanation");
+      const marksCol = column("marks");
+      const negativeCol = column("negativemarks", "negativemark");
+      const optionsCol = column("options");
+      const imported: Question[] = [];
+
+      rows.slice(1).forEach((values, rowOffset) => {
+        const questionText = (values[qCol] ?? "").trim();
+        if (!questionText) return;
+        let options = optionCols.map((idx) => idx >= 0 ? (values[idx] ?? "").trim() : "");
+        if (options.every((value) => !value) && optionsCol >= 0) {
+          options = (values[optionsCol] ?? "").split("|").map((value) => value.trim());
+        }
+        while (options.length && !options[options.length - 1]) options.pop();
+        if (options.length < 2 || options.some((value) => !value)) {
+          throw new Error(`CSV row ${rowOffset + 2}: provide at least two complete options.`);
+        }
+        const answerTokens = (values[answerCol] ?? "").trim().split(/[|;]/).map((v) => v.trim().toUpperCase()).filter(Boolean);
+        const answers = answerTokens.map((token) => /^[A-H]$/.test(token) ? token.charCodeAt(0) - 65 : /^\d+$/.test(token) ? Number(token) - 1 : -1);
+        if (!answers.length || answers.some((answer) => answer < 0 || answer >= options.length) || new Set(answers).size !== answers.length) {
+          throw new Error(`CSV row ${rowOffset + 2}: answer must be option letters or 1-based numbers, e.g. A or A|C.`);
+        }
+        const multipleAnswers = multipleCol >= 0
+          ? ["true", "yes", "1"].includes((values[multipleCol] ?? "").trim().toLowerCase())
+          : answers.length > 1;
+        if (!multipleAnswers && answers.length !== 1) {
+          throw new Error(`CSV row ${rowOffset + 2}: set multipleAnswers=true for multiple correct answers.`);
+        }
+        const readNumber = (idx: number, fallback: number) => {
+          if (idx < 0 || !(values[idx] ?? "").trim()) return fallback;
+          const n = Number(values[idx]);
+          return Number.isFinite(n) && n >= 0 ? n : fallback;
+        };
+        imported.push({
+          id: crypto.randomUUID(), question: questionText, options, answers, multipleAnswers,
+          explanation: explanationCol >= 0 ? values[explanationCol] ?? "" : "",
+          marks: readNumber(marksCol, settings.marksPerQuestion),
+          negativeMarks: readNumber(negativeCol, settings.negativeMarks),
+        });
+      });
+      if (!imported.length) throw new Error("No valid questions found in the CSV.");
+      setQuestions((current) => [...current, ...imported]);
+      setActive(questions.length);
+      setMessage(`Imported ${imported.length} question(s). Review them and save the test.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not import CSV.");
+    }
+  }
+
+  function downloadCsvTemplate() {
+    const csv = [
+      "question,optionA,optionB,optionC,optionD,answer,multipleAnswers,explanation,marks,negativeMarks",
+      '"Which one is a primary market?","IPO","Stock exchange","Mutual fund","Bank deposit","A",false,"An IPO is part of the primary market.",1,0.25',
+      '"Select both examples of equity instruments","Equity shares","Preference shares","Fixed deposit","Treasury bill","A|B",true,"Both equity and preference shares are equity instruments.",2,0.5',
+    ].join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "mock-test-questions-template.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   function updateQuestion(index: number, changes: Partial<Question>) {
@@ -294,7 +443,7 @@ export default function MockTestStudio() {
         subject,
         excerpt: excerpt.trim(),
         body,
-        coverImageUrl: "",
+        coverImageUrl: coverImageUrl || "",
         tags: ["mock-test"],
         status,
         featured: false,
@@ -390,6 +539,27 @@ export default function MockTestStudio() {
           <textarea required minLength={5} maxLength={500} rows={2} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="What does this test cover?" />
         </label>
 
+        <div className="content-editor">
+          <h3>Cover image</h3>
+          <p className="field-hint">Optional image for this mock test. JPG, PNG, WEBP or GIF, maximum 5 MB.</p>
+          <label>
+            Upload cover image
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={uploadingImage} onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void uploadCoverImage(file);
+              event.currentTarget.value = "";
+            }} />
+          </label>
+          {uploadingImage && <p className="muted-copy">Uploading image...</p>}
+          {coverImageUrl && <div className="form-row">
+            <img src={coverImageUrl} alt="Mock test cover preview" style={{ display: "block", width: "min(100%, 320px)", maxHeight: 180, objectFit: "cover", borderRadius: 12 }} />
+            <div>
+              <p className="field-hint">Cover image selected</p>
+              <button type="button" className="danger-link" onClick={() => setCoverImageUrl("")}>Remove cover image</button>
+            </div>
+          </div>}
+        </div>
+
         <div className="form-row">
           <label>
             Duration (minutes)
@@ -426,13 +596,23 @@ export default function MockTestStudio() {
             <p className="eyebrow">QUESTION BUILDER</p>
             <h3>Questions ({questions.length})</h3>
           </div>
-          <button type="button" className="button button-secondary" onClick={() => {
-            setQuestions((current) => [...current, createQuestion()]);
-            setActive(questions.length);
-          }}>
-            + Add question
-          </button>
+          <div className="form-row">
+            <button type="button" className="button button-secondary" onClick={downloadCsvTemplate}>Download CSV template</button>
+            <label className="button button-secondary">
+              Upload CSV
+              <input type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void importCsv(file);
+                event.currentTarget.value = "";
+              }} />
+            </label>
+            <button type="button" className="button button-secondary" onClick={() => {
+              setQuestions((current) => [...current, createQuestion()]);
+              setActive(questions.length);
+            }}>+ Add question</button>
+          </div>
         </div>
+        <p className="field-hint">CSV columns: question, optionA, optionB, optionC, optionD, answer, multipleAnswers, explanation, marks, negativeMarks. Use A or B for one correct answer, or A|C for multiple correct answers. Import adds questions to the current list.</p>
 
         {questions.length > 0 && (
           <div className="form-row">
