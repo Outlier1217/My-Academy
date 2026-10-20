@@ -196,6 +196,7 @@ export default function MockTestStudio() {
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -391,6 +392,55 @@ export default function MockTestStudio() {
 
     updateQuestion(index, { answers });
   }
+
+  
+async function deleteTest(test: TestItem) {
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${test.title}"?\n\nThis action cannot be undone.`
+  );
+
+  if (!confirmed) return;
+
+  setError("");
+  setMessage("");
+  setDeletingId(test.id);
+
+  try {
+    const response = await fetch(
+      `/api/admin/content/${test.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ?? "Could not delete mock test."
+      );
+    }
+
+    if (editingId === test.id) {
+      reset();
+    }
+
+    setTests((current) =>
+      current.filter((item) => item.id !== test.id)
+    );
+
+    setMessage(`"${test.title}" deleted successfully.`);
+  } catch (error) {
+    setError(
+      error instanceof Error
+        ? error.message
+        : "Could not delete mock test."
+    );
+  } finally {
+    setDeletingId(null);
+  }
+}
+
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -742,9 +792,27 @@ export default function MockTestStudio() {
                 <h3>{test.title}</h3>
                 <p>{test.subject.replace("_", " ")} · /{test.slug}</p>
               </div>
+
               <div className="library-item-actions">
-                <button type="button" className="text-link" onClick={() => editTest(test)}>Edit</button>
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => editTest(test)}
+                  disabled={deletingId !== null}
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  className="danger-link"
+                  onClick={() => void deleteTest(test)}
+                  disabled={deletingId !== null}
+                >
+                  {deletingId === test.id ? "Deleting..." : "Delete"}
+                </button>
               </div>
+
             </article>
           ))}
         </div>
