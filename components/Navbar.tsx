@@ -8,11 +8,12 @@ import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeProvider";
 
 const NAV_ITEMS = [
+  { label: "Home", href: "/" },
   { label: "Articles", href: "/articles" },
   { label: "Blogs", href: "/blogs" },
   { label: "Stories", href: "/stories" },
   { label: "Mock Tests", href: "/mock-tests" },
-  { label: "Mathematics", href: "/math" },
+  { label: "Projects", href: "/projects" },
   { label: "Courses", href: "/courses" },
 ];
 
