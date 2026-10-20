@@ -176,3 +176,25 @@ model CandidateTestimonial {
   @@index([isPublished, sortOrder])
   @@index([createdAt])
 }
+
+model Project {
+  id            String        @id @default(cuid())
+  title         String        @db.VarChar(150)
+  slug          String        @unique @db.VarChar(180)
+  tagline       String        @db.VarChar(300)
+  summary       String        @db.VarChar(1000)
+  description   String        @db.Text
+  coverImageUrl String        @db.VarChar(2048)
+  demoUrl       String?       @db.VarChar(2048)
+  repoUrl       String?       @db.VarChar(2048)
+  techStack     String[]      @default([])
+  status        ContentStatus @default(DRAFT)
+  featured      Boolean       @default(false)
+  sortOrder     Int           @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status, sortOrder])
+  @@index([featured, publishedAt])
+}

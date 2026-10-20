@@ -8,6 +8,8 @@ import UserManagementPanel from "@/components/UserManagementPanel";
 import ContactMessagesPanel from "@/components/ContactMessagesPanel";
 import CourseReviewsAdminPanel from "@/components/CourseReviewsAdminPanel";
 import TestimonialsStudio from "@/components/TestimonialsStudio";
+import ProjectsStudio from "@/components/ProjectsStudio";
+
 
 type ContentType = "ARTICLE" | "BLOG" | "STORY" | "MOCK_TEST";
 type ContentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -18,7 +20,8 @@ type Section =
   | "users"
   | "messages"
   | "reviews"
-  | "testimonials";
+  | "testimonials"
+  | "projects";
 
 type Item = {
   id: string;
@@ -400,6 +403,17 @@ export default function AdminDashboard() {
 >
   Success Stories
 </button>
+<button
+  type="button"
+  className={
+    activeSection === "projects"
+      ? "button button-primary"
+      : "button button-secondary"
+  }
+  onClick={() => setActiveSection("projects")}
+>
+  Projects Studio
+</button>
         </nav>
 
         <div className="admin-stats">
@@ -586,8 +600,10 @@ export default function AdminDashboard() {
             <ContactMessagesPanel />
           ) : activeSection === "reviews" ? (
             <CourseReviewsAdminPanel />
-          ) : (
+          ) : activeSection === "testimonials" ? (
             <TestimonialsStudio />
+          ) : (
+            <ProjectsStudio />
           )}
 
         <p className="admin-footnote">
