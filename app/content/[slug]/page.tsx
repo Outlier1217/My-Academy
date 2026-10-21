@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import SafeContent from "@/components/content/SafeContent";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MockTestRunner from "@/components/MockTestRunner";
@@ -37,9 +36,7 @@ export default async function ContentDetailPage({ params }: { params: { slug: st
   />
 ) : (
   <div className="markdown-body">
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-      {item.body}
-    </ReactMarkdown>
+    <SafeContent content={item.body} />
   </div>
 )}
       {item.tags.length > 0 && <div className="tag-list" aria-label="Tags">{item.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
