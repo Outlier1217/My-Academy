@@ -1441,3 +1441,78 @@ button { cursor: pointer; }
 
 
 
+
+/* Mock test title search and filters */
+.mock-test-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(145px, 0.7fr) minmax(200px, 1fr);
+  gap: 16px;
+  margin: 0 0 28px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.mock-test-filters > label {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.mock-test-filter-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mock-test-filters input,
+.mock-test-filters select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.mock-test-filters input:focus,
+.mock-test-filters select:focus {
+  border-color: var(--amber);
+}
+
+.mock-test-filter-footer {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.mock-test-filter-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 760px) {
+  .mock-test-filters {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  .mock-test-filter-footer {
+    grid-column: auto;
+  }
+}
