@@ -160,7 +160,12 @@ export default function MockTestRunner({
     if (!activeQuestion) return;
 
     const originalIndex = activeQuestion.originalIndex;
-    const selected = answers[originalIndex] ?? [];
+    const optionOrder = (
+      activeQuestion as QuestionView & { originalOptionIndexes?: number[] }
+    ).originalOptionIndexes;
+    const originalOptionIndex = optionOrder
+      ? optionOrder[displayIndex]
+      : displayIndex;
     const multiple = activeQuestion.options.length > 0 &&
       // Multi-answer questions can be selected via the "Select all that apply" setting.
       // The builder will store this flag on the question.
@@ -171,11 +176,11 @@ export default function MockTestRunner({
       let next: number[];
 
       if (multiple) {
-        next = existing.includes(displayIndex)
-          ? existing.filter((value) => value !== displayIndex)
-          : [...existing, displayIndex];
+        next = existing.includes(originalOptionIndex)
+          ? existing.filter((value) => value !== originalOptionIndex)
+          : [...existing, originalOptionIndex];
       } else {
-        next = existing.includes(displayIndex) ? [] : [displayIndex];
+        next = [originalOptionIndex];
       }
 
       return { ...previous, [originalIndex]: next };
