@@ -145,8 +145,12 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="nav-actions">
-          <ThemeToggle />
+<div className="nav-actions">
+  <ThemeToggle />
+
+  <Link href="/donate" className="nav-donate">
+    <span aria-hidden="true">♥</span> Donate
+  </Link>
 
           {authChecked && !user && (
             <Link href="/join" className="nav-join">
@@ -243,6 +247,16 @@ export default function Navbar() {
               <span aria-hidden="true">↗</span>
             </Link>
           ))}
+
+          <Link
+  href="/donate"
+  className="mobile-donate-link"
+  tabIndex={menuOpen ? 0 : -1}
+  onClick={closeMenu}
+>
+  <span>♥ Donate</span>
+  <span aria-hidden="true">↗</span>
+</Link>
 
           {authChecked && !user && (
             <>
